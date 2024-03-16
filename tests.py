@@ -1,5 +1,5 @@
 import unittest
-from bunTokenizer import tokenize  # Import your tokenizer function from your module
+from bunTokenizer import tokenize
 
 class TestTokenizer(unittest.TestCase):
     def test_basic_expression(self):
