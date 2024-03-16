@@ -30,9 +30,11 @@ def tokenize(input_string):
                 break
         if not matched:
             raise ValueError('Invalid character: ' + input_string[0])
+    if not tokens or tokens[-1][0] != 'EOF':  # Add EOF token only if not already present
+        tokens.append(('EOF', ''))
     return tokens
 
-# Test the tokenizer
-input_string = "x = 10 + 20"
-tokens = tokenize(input_string)
-print(tokens)
+# # tests
+# input_string = " x = 10 + 20 "
+# tokens = tokenize(input_string)
+# print(tokens)

@@ -26,8 +26,7 @@ class IdentifierNode(Node):
 
 class AssignmentNode(Node):
     pass
-class VariableDeclarationNode(Node):
-    pass
+
 
 def _get_token_text(node):
     if isinstance(node, NumberNode):
@@ -38,13 +37,14 @@ def _get_token_text(node):
         raise ValueError("Unsupported node type")
 
 
-
 def parse_assignment(tokens):
     identifier = parse_factor(tokens)  # Get the left-hand side identifier
     if tokens.pop(0)[0] != 'ASSIGN':  # Consume the '=' token
         raise SyntaxError("Expected '='")
     value = parse_expression(tokens)  # Get the right-hand side expression
-    return AssignmentNode("Assignment", Name=_get_token_text(identifier), Value=value)
+    return AssignmentNode("Assignment", Identifier=_get_token_text(identifier), Value=_get_token_text(value))
+
+
 
 def parse_factor(tokens):
     if tokens[0][0] == 'NUMBER':

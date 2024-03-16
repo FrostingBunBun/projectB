@@ -35,14 +35,17 @@ def main():
             # Interpret AST and display result
             result = interpreter.interpret(ast)
             print_ast(ast)
+            print("=====================")
             print("Result:", result)
         except KeyboardInterrupt:
             # Handle Ctrl+C to exit the loop
             print("\nExiting.")
             break
+        except SyntaxError as e:
+            print("Syntax Error:", e)
         except Exception as e:
-            # Handle any other exceptions gracefully
             print("Error:", e)
+
 
 if __name__ == "__main__":
     main()
