@@ -30,7 +30,14 @@ class VariableDeclarationNode(Node):
     pass
 
 def _get_token_text(node):
-    return node[1]
+    if isinstance(node, NumberNode):
+        return str(node.attributes['Value'])  # Access the 'Value' attribute of the NumberNode
+    elif isinstance(node, IdentifierNode):
+        return node.attributes['Name']  # Access the 'Name' attribute of the IdentifierNode
+    else:
+        raise ValueError("Unsupported node type")
+
+
 
 def parse_assignment(tokens):
     identifier = parse_factor(tokens)  # Get the left-hand side identifier
