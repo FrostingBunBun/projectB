@@ -12,29 +12,39 @@ class Node:
         if self.attributes:
             json_dict.update(self.attributes)
         if self.children:
-            json_dict["Children"] = [child.to_json() for child in self.children]
+            json_dict["Children"] = [child.to_json() for child in self.children]  # Convert child nodes to JSON
         return json_dict
+
 
 class NumberNode(Node):
     pass
 
-class BinaryOperationNode(Node):
+
+class StringNode(Node):
     pass
+
 
 class IdentifierNode(Node):
     pass
 
-class AssignmentNode(Node):
+
+class VariableNode(Node):
     pass
 
 
-def _get_token_text(node):
-    if isinstance(node, NumberNode):
-        return str(node.attributes['Value'])  # Access the 'Value' attribute of the NumberNode
-    elif isinstance(node, IdentifierNode):
-        return node.attributes['Name']  # Access the 'Name' attribute of the IdentifierNode
-    else:
-        raise ValueError("Unsupported node type")
+class BinaryOperationNode(Node):
+    pass
+
+
+class AssignmentNode(Node):
+    def to_json(self):
+        json_dict = super().to_json()  # Call the parent class method to get the base JSON
+        # Convert the Value field to JSON if it's a Node instance
+        if isinstance(self.attributes['Value'], Node):
+            json_dict['Value'] = self.attributes['Value'].to_json()
+        return json_dict
+        
+
 
 
 def parse_assignment(tokens):
@@ -42,15 +52,18 @@ def parse_assignment(tokens):
     if tokens.pop(0)[0] != 'ASSIGN':  # Consume the '=' token
         raise SyntaxError("Expected '='")
     value = parse_expression(tokens)  # Get the right-hand side expression
-    return AssignmentNode("Assignment", Identifier=_get_token_text(identifier), Value=_get_token_text(value))
-
+    return AssignmentNode("Assignment", Identifier=_get_token_text(identifier), Value=value)
 
 
 def parse_factor(tokens):
     if tokens[0][0] == 'NUMBER':
         return NumberNode("NumLiteral", Value=float(tokens.pop(0)[1]))  # Consume and return the number token
+    elif tokens[0][0] == 'STRING':
+        return StringNode("StringLiteral", Value=tokens.pop(0)[1])  # Consume and return the string token
     elif tokens[0][0] == 'IDENTIFIER':
         return IdentifierNode("Identifier", Name=tokens.pop(0)[1])  # Consume and return the identifier token
+    elif tokens[0][0] == 'VARIABLE':
+        return VariableNode("Variable", Name=tokens.pop(0)[1])  # Consume and return the variable token
     elif tokens[0][0] == 'LPAREN':
         tokens.pop(0)  # Consume the left parenthesis token
         expression = parse_expression(tokens)
@@ -58,7 +71,8 @@ def parse_factor(tokens):
             raise SyntaxError('Expected closing parenthesis')
         return expression
     else:
-        raise SyntaxError('Expected number, identifier, or left parenthesis')
+        raise SyntaxError('Expected number, string, identifier, variable, or left parenthesis')
+
 
 def parse_term(tokens):
     left = parse_factor(tokens)
@@ -70,6 +84,7 @@ def parse_term(tokens):
         binary_node.add_child(right)
         left = binary_node
     return left
+
 
 def parse_expression(tokens):
     if tokens[0][0] == 'IDENTIFIER' and len(tokens) > 1 and tokens[1][0] == 'ASSIGN':
@@ -85,5 +100,48 @@ def parse_expression(tokens):
             left = binary_node
         return left
 
+
+def _get_token_text(node):
+    if isinstance(node, NumberNode):
+        return node.attributes['Value']  # Access the 'Value' attribute of the NumberNode
+    elif isinstance(node, StringNode):
+        return node.attributes['Value']  # Access the 'Value' attribute of the StringNode
+    elif isinstance(node, IdentifierNode):
+        return node.attributes['Name']  # Access the 'Name' attribute of the IdentifierNode
+    elif isinstance(node, VariableNode):
+        return node.attributes['Name']  # Access the 'Name' attribute of the VariableNode
+    else:
+        raise ValueError("Unsupported node type")
+
+
 def parse(tokens):
     return parse_expression(tokens).to_json()
+
+
+
+# # TESTS
+
+# # Define your tokens representing expressions or assignments
+# tokens = [
+#     ('IDENTIFIER', 'x'),
+#     ('ASSIGN', '='),
+#     ('NUMBER', '10'),
+#     ('PLUS', '+'),
+#     ('NUMBER', '5'),
+#     ('MULTIPLY', '*'),
+#     ('NUMBER', '2'),
+#     ('ASSIGN', '='),
+#     ('NUMBER', '15'),
+#     ('ASSIGN', '='),
+#     ('STRING', 'hello'),
+#     ('ASSIGN', '='),
+#     ('IDENTIFIER', 'x'),
+#     ('PLUS', '+'),
+#     ('NUMBER', '5'),
+# ]
+
+# # Call the parse function with the tokens
+# result = parse(tokens)
+
+# # Print the result
+# print(result)
