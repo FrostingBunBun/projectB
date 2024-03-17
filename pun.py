@@ -36,7 +36,7 @@ class Pun:
     def run(source):
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-
+    
         # For now, just print the tokens.
         for token in tokens:
             print(token)

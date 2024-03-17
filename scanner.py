@@ -1,5 +1,5 @@
 from tokenType import *
-from token1 import Token
+from bunToken import Token
 from pun import Pun
 
 class Scanner:
