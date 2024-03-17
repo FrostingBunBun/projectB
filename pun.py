@@ -1,71 +1,65 @@
 import sys
+import os
+from scanner import Scanner
+from bunParser import Parser
+from astPrinter import AstPrinter
+from tokenType import TokenType
+
 
 class Pun:
+    __slots__ = ('had_error')
 
-    had_error = False
-    
-    @staticmethod
-    def main(args):
-        if len(args) > 1:
-            print("Usage: python pun.py [script]")
-            sys.exit(64)
-        elif len(args) == 1:
-            Pun.run_file(args[0])
+    def __init__(self):
+        self.had_error = False
+
+    def error(self, token, message):
+        if token.token_type == TokenType.EOF:
+            self.report_error(token.line, " at end", message)
         else:
-            Pun.run_prompt()
+            self.report_error(token.line, f" at '{token.lexeme}'", message)
 
-    @staticmethod
-    def run_file(path):
-        with open(path, 'r') as file:
-            source = file.read()
-        if Pun.had_error:
+    def run_file(self, filename):
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                self.run(f.read())
+        else:
+            print('File does not exist')
+
+    def run(self, line):
+        scanner = Scanner(line)
+        print(f"SCANNER: \n{scanner}")
+        tokens = scanner.scanTokens()
+        print(f"TOKENS: \n{tokens}")
+        parser = Parser(tokens)
+        print(f"PARSER: \n{parser}")
+        expression = parser.parse()
+        print("EXPRESSION: ", expression)
+        if self.had_error:
+            return
+
+        print(AstPrinter().print(expression))
+        
+
+    def run_prompt(self):
+        line = input('> ')
+        while (len(line) > 0 and line != None and line != TokenType.EOF):
+        # while (len(line) > 0 and line != None):
+            self.run(line)
+            line = input('> ')
+
+    def report_error(self, line, where, message):
+        print(f"line {line} Error{where}: {message}")
+        self.had_error = True
+
+if __name__ == '__main__':
+    pun = Pun()
+
+    if len(sys.argv) > 2:
+        print('Usage: python3 pun.py [script]')
+    elif len(sys.argv) == 2:
+        pun.run_file(sys.argv[1])
+        if pun.had_error:
             sys.exit(65)
-        Pun.run(source)
-
-    @staticmethod
-    def run_prompt():
-        while True:
-            try:
-                line = input("> ")
-                Pun.run(line)
-                Pun.had_error = False
-            except EOFError:
-                break
-
-    @staticmethod
-    def run(source):
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-    
-        # For now, just print the tokens.
-        for token in tokens:
-            print(token)
-
-    @staticmethod
-    def error(line, message):
-        Pun.report(line, "", message)
-
-    @staticmethod
-    def report(line, where, message):
-        print("[line " + str(line) + "] Error" + where + ": " + message, file=sys.stderr)
-        Pun.had_error = True
-
-
-class Scanner:
-    def __init__(self, source):
-        self.source = source
-        self.tokens = []
-
-    def scan_tokens(self):
-        # Tokenization logic
-        pass
-
-class Token:
-    def __init__(self, type, lexeme, literal, line):
-        self.type = type
-        self.lexeme = lexeme
-        self.literal = literal
-        self.line = line
-
-if __name__ == "__main__":
-    Pun.main(sys.argv)
+    else:
+        pun.run_prompt()
+        pun.had_error = False

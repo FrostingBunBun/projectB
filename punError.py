@@ -1,0 +1,2 @@
+class PunError(Exception):
+    pass

@@ -1,7 +1,10 @@
 from tokenType import TokenType
 from bunToken import Token
-from Expr import Expr
 from bunParser import Parser
+from scanner import Scanner
+print("======================")
+
+
 
 def test_parser(input_expr):
     # Tokenize the input expression
@@ -24,22 +27,15 @@ def test_parser(input_expr):
         print()
 
 def tokenize(input_expr):
-    # Dummy function to tokenize the input expression
-    # Replace it with your actual tokenization logic
-    # For simplicity, we assume the input expression is already tokenized
-    return [Token(TokenType.NUMBER, "5", 5, 1),
-            Token(TokenType.PLUS, "+", None, 1),
-            Token(TokenType.NUMBER, "3", 3, 1),
-            Token(TokenType.EOF, "", None, 1)]
+
+    scanner = Scanner(input_expr)
+    print(f"SCANNER:\n{scanner}")
+    tokens = scanner.scanTokens()
+    print(f"TOKENS:\n{tokens}")
+    return tokens
 
 # Test cases
-# test_parser("5 + 3")
-# test_parser("5 * (3 - 2) / 4")
-# test_parser("3 > 2")
-# test_parser("true != false")
-# test_parser("-5")
-# test_parser("3 * (2 + 4)")
-# test_parser("5 + 3 * (7 - 2) == 20")
-# test_parser("5 *+")  # Invalid expression
-# test_parser("")
-test_parser("true and nil")
+
+test_parser("5 * (3 - 2) / 4")
+print("============")
+test_parser("1- 10;")

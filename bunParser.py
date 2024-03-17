@@ -1,7 +1,7 @@
 from typing import List
 from tokenType import TokenType
 from bunToken import Token
-from Expr import Expr
+from Expr import Expr, Binary, Unary, Literal, Grouping
 
 class Parser:
     class ParseError(RuntimeError):
@@ -23,7 +23,7 @@ class Parser:
         while self.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL):
             operator = self.previous()
             right = self.comparison()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Binary(expr, operator, right)
 
         return expr
 
@@ -45,7 +45,7 @@ class Parser:
         """
         if self.is_at_end():
             return False
-        return self.peek().type == tokenType
+        return self.peek().token_type == tokenType
 
     def advance(self) -> Token:
         """
@@ -59,7 +59,7 @@ class Parser:
         """
         Check if we have reached the end of input.
         """
-        return self.peek().type == TokenType.EOF
+        return self.peek().token_type == TokenType.EOF
 
     def peek(self) -> Token:
         """
@@ -82,7 +82,7 @@ class Parser:
         while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
             operator = self.previous()
             right = self.term()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Binary(expr, operator, right)
 
         return expr
 
@@ -95,7 +95,7 @@ class Parser:
         while self.match(TokenType.MINUS, TokenType.PLUS):
             operator = self.previous()
             right = self.factor()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Binary(expr, operator, right)
 
         return expr
 
@@ -108,7 +108,7 @@ class Parser:
         while self.match(TokenType.SLASH, TokenType.STAR):
             operator = self.previous()
             right = self.unary()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Binary(expr, operator, right)
 
         return expr
 
@@ -119,7 +119,7 @@ class Parser:
         if self.match(TokenType.BANG, TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
-            return Expr.Unary(operator, right)
+            return Unary(operator, right)
 
         return self.primary()
 
@@ -129,19 +129,19 @@ class Parser:
                 | "(" expression ")" ;
         """
         if self.match(TokenType.FALSE):
-            return Expr.Literal(False)
+            return Literal(False)
         if self.match(TokenType.TRUE):
-            return Expr.Literal(True)
+            return Literal(True)
         if self.match(TokenType.NIL):
-            return Expr.Literal(None)
+            return Literal(None)
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
-            return Expr.Literal(self.previous().literal)
+            return Literal(self.previous().literal)
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
-            return Expr.Grouping(expr)
+            return Grouping(expr)
         raise self.error(self.peek(), "Expect expression.")
 
 
@@ -167,11 +167,11 @@ class Parser:
         self.advance()
 
         while not self.is_at_end():
-            if self.previous().type == TokenType.SEMICOLON:
+            if self.previous().token_type == TokenType.SEMICOLON:
                 return
 
             # Check if the current token indicates the start of a new statement
-            if self.peek().type in [TokenType.CLASS, TokenType.FUN, TokenType.VAR, TokenType.FOR,
+            if self.peek().token_type in [TokenType.CLASS, TokenType.FUN, TokenType.VAR, TokenType.FOR,
                                           TokenType.IF, TokenType.WHILE, TokenType.PRINT, TokenType.RETURN]:
                 return
 

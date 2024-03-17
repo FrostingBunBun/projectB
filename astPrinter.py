@@ -1,40 +1,44 @@
-import Expr
+from Expr import Binary, Unary, Literal, Grouping, Visitor
 from bunToken import Token
 from tokenType import TokenType
 
-class AstPrinter:
+class AstPrinter(Visitor):
     def print(self, expr):
         return expr.accept(self)
 
-    def visitBinaryExpr(self, expr):
-        return self.parenthesize(expr.operator.lexeme, expr.left, expr.right)
+    def visitBinaryExpr(self, expr_instance):
+        return self.parenthesize(expr_instance.operator.lexeme, expr_instance.left, expr_instance.right)
 
-    def visitGroupingExpr(self, expr):
-        return self.parenthesize("group", expr.expression)
+    def visitGroupingExpr(self, expr_instance):
+        return self.parenthesize('group', expr_instance.expression);
 
-    def visitLiteralExpr(self, expr):
-        if expr.value is None:
-            return "nil"
-        return str(expr.value)
+    def visitLiteralExpr(self, expr_instance):
+        if expr_instance.value == None:
+            return 'nil'
+        else:
+            return str(expr_instance.value)
 
-    def visitUnaryExpr(self, expr):
-        return self.parenthesize(expr.operator.lexeme, expr.right)
+    def visitUnaryExpr(self, expr_instance):
+        return self.parenthesize(expr_instance.operator, expr_instance.right)
 
-    def parenthesize(self, name, *exprs):
-        result = f"({name}"
-        for expr in exprs:
-            result += " "
-            result += expr.accept(self)
-        result += ")"
-        return result
+    def parenthesize(self, name, *expressions):
+        output = ''
+        output += f'({name}'
+        for expression in expressions:
+            output += ' '
+            output += expression.accept(self)
+        output += ')'
 
+        return output
+    
+    
 # if __name__ == "__main__":
-#     expression = Expr.Binary(
-#         Expr.Unary(
+#     expression = Binary(
+#         Unary(
 #             Token(TokenType.MINUS, "-", None, 1),
-#             Expr.Literal(123)),
+#             Literal(123)),
 #         Token(TokenType.STAR, "*", None, 1),
-#         Expr.Grouping(
-#             Expr.Literal(45.67)))
+#         Grouping(
+#             Literal(45.67)))
 
 #     print(AstPrinter().print(expression))

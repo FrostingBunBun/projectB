@@ -1,6 +1,6 @@
 from tokenType import *
 from bunToken import Token
-from pun import Pun
+from punError import PunError
 
 class Scanner:
 
@@ -34,7 +34,7 @@ class Scanner:
         
     def scanTokens(self):
         while not self.isAtEnd():
-            # We are at the beginning of the next lexeme.
+            # beginning of the next lexeme
             self.start = self.current
             self.scanToken()
 
@@ -73,13 +73,13 @@ class Scanner:
             self.addToken(TokenType.GREATER_EQUAL if self.match('=') else TokenType.GREATER)
         elif c == '/':
             if self.match('/'):
-                # A comment goes until the end of the line.
+                # A comment goes until the end of the line
                 while self.peek() != '\n' and not self.isAtEnd():
                     self.advance()
             else:
                 self.addToken(TokenType.SLASH)
         elif c in [' ', '\r', '\t']:
-            # Ignore whitespace.
+            # Ignore whitespace
             pass
         elif c == '\n':
             self.line += 1
@@ -92,7 +92,7 @@ class Scanner:
 
 
         else:
-            Pun.error(self.line, "Unexpected character: " + c)
+            PunError(self.line, "Unexpected character: " + c)
 
     def identifier(self):
         while self.isAlphaNumeric(self.peek()):
@@ -107,7 +107,7 @@ class Scanner:
         while self.isDigit(self.peek()):
             self.advance()
 
-        # Look for a fractional part.
+        # Look for a fractional part
         if self.peek() == '.' and self.isDigit(self.peekNext()):
             # Consume the "."
             self.advance()
@@ -128,13 +128,13 @@ class Scanner:
             self.advance()
 
         if self.isAtEnd():
-            Pun.error(self.line, "Unterminated string.")
+            PunError(self.line, "Unterminated string.")
             return
 
-        # The closing ".
+        # The closing "
         self.advance()
 
-        # Trim the surrounding quotes.
+        # Trim the surrounding quotes
         value = self.source[self.start + 1:self.current - 1]
         self.addToken(TokenType.STRING, value)
 
@@ -181,4 +181,3 @@ class Scanner:
         text = self.source[self.start:self.current]
         self.tokens.append(Token(type, text, literal, self.line))
 
-    
