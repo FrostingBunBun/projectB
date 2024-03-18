@@ -4,10 +4,15 @@ from scanner import Scanner
 from bunParser import Parser
 from astPrinter import AstPrinter
 from tokenType import TokenType
-
+from interpreter import Interpreter
 
 class Pun:
+
+    interpreter = Interpreter()
+
     __slots__ = ('had_error')
+
+    hadRuntimeError = False
 
     def __init__(self):
         self.had_error = False
@@ -18,26 +23,36 @@ class Pun:
         else:
             self.report_error(token.line, f" at '{token.lexeme}'", message)
 
+    def runtimeError(self, error):
+        print(error.message)
+        print(f"\n[line {error.token.line}]")
+        self.hadRuntimeError = True
+
+
     def run_file(self, filename):
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 self.run(f.read())
+            if self.had_error:
+                SystemExit(65)
+            if self.hadRuntimeError:
+                sys.exit(70)
         else:
             print('File does not exist')
 
     def run(self, line):
         scanner = Scanner(line)
-        print(f"SCANNER: \n{scanner}")
+        # print(f"SCANNER: \n{scanner}")
         tokens = scanner.scanTokens()
-        print(f"TOKENS: \n{tokens}")
+        # print(f"TOKENS: \n{tokens}")
         parser = Parser(tokens)
-        print(f"PARSER: \n{parser}")
+        # print(f"PARSER: \n{parser}")
         expression = parser.parse()
-        print("EXPRESSION: ", expression)
+        # print("EXPRESSION: ", expression)
         if self.had_error:
             return
-
-        print(AstPrinter().print(expression))
+        self.interpreter.interpret(expression)
+        # print(AstPrinter().print(expression))
         
 
     def run_prompt(self):
