@@ -36,6 +36,7 @@ def tokenize(input_expr):
 
 # Test cases
 
-test_parser("5 * (3 - 2) / 4")
+# test_parser("5 * (3 - 2) / 4")
+test_parser("-123 * -45.67")
 print("============")
-test_parser("1- 10;")
+# test_parser("1- 10;")
