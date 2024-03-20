@@ -2,6 +2,7 @@ from typing import List
 from tokenType import TokenType
 from bunToken import Token
 from Expr import Expr, Binary, Unary, Literal, Grouping
+import stmt
 
 class Parser:
     class ParseError(RuntimeError):
@@ -13,6 +14,23 @@ class Parser:
 
     def expression(self) -> Expr:
         return self.equality()
+    
+    def statement(self):
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+        else:
+            return self.expressionStatement()
+    
+    def print_statement(self):
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Print(value)
+
+    def expressionStatement(self):
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return stmt.Expression(expr)
+
 
     def equality(self) -> Expr:
         """
@@ -178,7 +196,10 @@ class Parser:
             self.advance()
 
     def parse(self):
+        statements = []
         try:
-            return self.expression()
+            while not self.is_at_end():
+                statements.append(self.statement())
         except self.ParseError as error:
-            return None
+            return error
+        return statements

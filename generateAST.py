@@ -5,11 +5,9 @@ def main(args):
         print("Usage: generate_ast <output directory>", file=sys.stderr)
         sys.exit(64)
     output_dir = args[1]
-    defineAst(output_dir, "Expr", [
-        "Binary   : Expr left, Token operator, Expr right",
-        "Grouping : Expr expression",
-        "Literal  : object value",
-        "Unary    : Token operator, Expr right"
+    defineAst(output_dir, "stmt", [
+        "Expression : Expr expression",
+      "Print      : Expr expression"
     ])
 
 def defineAst(outputDir, baseName, types):

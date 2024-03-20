@@ -1,11 +1,27 @@
-from Expr import Visitor, Literal, Unary, Binary
+from Expr import Visitor
 from tokenType import TokenType
+from stmt import StmtVisitor
 
-class Interpreter(Visitor):
+
+class Interpreter(Visitor, StmtVisitor):
 
     def evaluate(self, expr):
         return expr.accept(self)
+    
+    def execute(self, stmt):
+        stmt.accept(self)
+    
+    def visitExpressionStmt(self, stmt):
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
+        return None
+    
+    def visitPrintStmt(self, stmt):
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
+        return None
 
+    
     @staticmethod
     def isTruthy(obj):
         if obj is None:
@@ -126,9 +142,9 @@ class Interpreter(Visitor):
         return None
 
 
-    def interpret(self, expression):
+    def interpret(self, statements):
         try:
-            value = self.evaluate(expression)
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except RuntimeError as error:
-            print("Runtime Error:", error)
+            print(error)

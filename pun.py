@@ -47,11 +47,11 @@ class Pun:
         # print(f"TOKENS: \n{tokens}")
         parser = Parser(tokens)
         # print(f"PARSER: \n{parser}")
-        expression = parser.parse()
+        expressions = parser.parse()
         # print("EXPRESSION: ", expression)
         if self.had_error:
             return
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(expressions)
         # print(AstPrinter().print(expression))
         
 
