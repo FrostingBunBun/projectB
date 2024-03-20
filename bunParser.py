@@ -1,7 +1,7 @@
 from typing import List
 from tokenType import TokenType
 from bunToken import Token
-from Expr import Expr, Binary, Unary, Literal, Grouping
+from Expr import Expr, Binary, Unary, Literal, Grouping, Variable
 import stmt
 
 class Parser:
@@ -155,6 +155,8 @@ class Parser:
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().literal)
+        if self.match(TokenType.IDENTIFIER):
+            return Variable(self.previous())
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
@@ -195,11 +197,44 @@ class Parser:
 
             self.advance()
 
+    def declaration(self):
+        try:
+            if self.match(TokenType.VAR):
+                return self.varDeclaration()
+    
+            return self.statement()
+        except self.ParseError as error:
+            self.synchronize()
+            return None
+        
+    def varDeclaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        initializer = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return stmt.Var(name, initializer)
+
+
+
+
     def parse(self):
-        statements = []
+        declarations = []
         try:
             while not self.is_at_end():
-                statements.append(self.statement())
+                declarations.append(self.declaration())
         except self.ParseError as error:
             return error
-        return statements
+        return declarations
+
+
+    # def parse(self):
+    #     statements = []
+    #     try:
+    #         while not self.is_at_end():
+    #             statements.append(self.statement())
+    #     except self.ParseError as error:
+    #         return error
+    #     return statements

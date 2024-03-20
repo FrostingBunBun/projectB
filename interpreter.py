@@ -1,9 +1,12 @@
 from Expr import Visitor
 from tokenType import TokenType
 from stmt import StmtVisitor
+from enviroment import Environment
 
 
 class Interpreter(Visitor, StmtVisitor):
+
+    enviroment = Environment()
 
     def evaluate(self, expr):
         return expr.accept(self)
@@ -21,6 +24,13 @@ class Interpreter(Visitor, StmtVisitor):
         print(self.stringify(value))
         return None
 
+    def visitVarStmt(self, stmt):
+        value = None
+        if stmt.initializer:
+            value = self.evaluate(stmt.initializer)
+
+        self.enviroment.define(stmt.name.lexeme, value)
+        return None
     
     @staticmethod
     def isTruthy(obj):
@@ -81,6 +91,9 @@ class Interpreter(Visitor, StmtVisitor):
 
         # Unreachable.
         return None
+    
+    def visitVariableExpr(self, expr):
+        return self.enviroment.get(expr.name)
 
     def visitBinaryExpr(self, expr):
 
@@ -140,6 +153,10 @@ class Interpreter(Visitor, StmtVisitor):
     
         # Unreachable.
         return None
+    
+
+    
+
 
 
     def interpret(self, statements):
