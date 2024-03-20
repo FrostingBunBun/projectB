@@ -33,7 +33,18 @@ class Binary(Expr):
 
     def accept(self, visitor):
         return visitor.visitBinaryExpr(self)
+    
+class Assign(Expr):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
 
+    def __str__(self):
+        return f"Assign Expr: {self.name.lexeme} = {self.value}"
+
+    def accept(self, visitor):
+        return visitor.visitAssignExpr(self)
+    
 class Grouping(Expr):
     def __str__(self):
         return f"Grouping Expr: {self.expression}"

@@ -32,6 +32,11 @@ class Interpreter(Visitor, StmtVisitor):
         self.enviroment.define(stmt.name.lexeme, value)
         return None
     
+    def visitAssignExpr(self, expr):
+        value = self.evaluate(expr.value)
+        self.enviroment.assign(expr.name, value)
+        return value
+    
     @staticmethod
     def isTruthy(obj):
         if obj is None:

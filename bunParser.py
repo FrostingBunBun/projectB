@@ -1,7 +1,7 @@
 from typing import List
 from tokenType import TokenType
 from bunToken import Token
-from Expr import Expr, Binary, Unary, Literal, Grouping, Variable
+from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign
 import stmt
 
 class Parser:
@@ -12,8 +12,11 @@ class Parser:
         self.tokens = tokens
         self.current = 0
 
+    # def expression(self) -> Expr:
+    #     return self.equality()
+        
     def expression(self) -> Expr:
-        return self.equality()
+        return self.assignment()
     
     def statement(self):
         if self.match(TokenType.PRINT):
@@ -30,6 +33,21 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return stmt.Expression(expr)
+    
+    def assignment(self):
+        expr = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Variable):
+                name = expr.name
+                return Assign(name, value)
+
+            self.error(equals, "Invalid assignment target.")
+
+        return expr
 
 
     def equality(self) -> Expr:
