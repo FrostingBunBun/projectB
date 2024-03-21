@@ -42,7 +42,7 @@ class Interpreter(Visitor, StmtVisitor):
         return None
     
     def visitIfStmt(self, stmt):
-        if self.isTruthy(self.evaluate(stmt.condition)):
+        if self.is_truthy(self.evaluate(stmt.condition)):
             self.execute(stmt.thenBranch)
         elif stmt.elseBranch is not None:
             self.execute(stmt.elseBranch)
@@ -53,7 +53,7 @@ class Interpreter(Visitor, StmtVisitor):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
         return None
-
+    
     def visitVarStmt(self, stmt):
         value = None
         if stmt.initializer is not None:
@@ -61,6 +61,13 @@ class Interpreter(Visitor, StmtVisitor):
 
         self.enviroment.define(stmt.name.lexeme, value)
         return None
+
+    def visitWhileStmt(self, stmt):
+        while self.isTruthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
+        
+        return None
+
 
     
     def visitAssignExpr(self, expr):
@@ -109,15 +116,16 @@ class Interpreter(Visitor, StmtVisitor):
     
     def visitLogicalExpr(self, expr):
         left = self.evaluate(expr.left)
-    
+
         if expr.operator.token_type == TokenType.OR:
             if self.isTruthy(left):
                 return left
         else:
             if not self.isTruthy(left):
                 return left
-    
+
         return self.evaluate(expr.right)
+
 
 
     def visitGroupingExpr(self, expr):

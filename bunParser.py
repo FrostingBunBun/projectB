@@ -3,7 +3,7 @@ from tokenType import TokenType
 from bunToken import Token
 from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical
 import stmt
-from stmt import Block, Expression
+from stmt import Block, While
 
 class Parser:
     class ParseError(RuntimeError):
@@ -26,13 +26,15 @@ class Parser:
             return self.ifStatement()
         elif self.match(TokenType.LEFT_BRACE):
             return Block(self.block())
+        elif self.match(TokenType.WHILE):
+            return self.whileStatement()
         else:
             return self.expressionStatement()
         
     def ifStatement(self):
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
         condition = self.expression()
-        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.") 
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
 
         thenBranch = self.statement()
         elseBranch = None
@@ -54,15 +56,16 @@ class Parser:
     
     def block(self):
         statements = []
-    
+
         while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
             statements.append(self.declaration())
-    
+
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
     
     def assignment(self):
-        expr = self.equality()
+        # expr = self.equality()
+        expr = self.or_()
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()
@@ -86,6 +89,7 @@ class Parser:
 
         return expr
 
+
     
     def and_(self):
         expr = self.equality()
@@ -96,6 +100,7 @@ class Parser:
             expr = Logical(expr, operator, right)
 
         return expr
+
 
 
     
@@ -283,6 +288,15 @@ class Parser:
 
         self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return stmt.Var(name, initializer)
+    
+    def whileStatement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        body = self.statement()
+
+        return While(condition, body)
+
 
 
 

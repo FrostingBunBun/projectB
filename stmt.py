@@ -41,3 +41,15 @@ class Block(Stmt):
 
     def accept(self, visitor):
         return visitor.visitBlockStmt(self)
+
+
+class While(Stmt):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+    def __str__(self):
+        return f"While: {self.condition}, {self.body}"
+
+    def accept(self, visitor):
+        return visitor.visitWhileStmt(self)
