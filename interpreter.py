@@ -12,7 +12,26 @@ class Interpreter(Visitor, StmtVisitor):
         return expr.accept(self)
     
     def execute(self, stmt):
-        stmt.accept(self)
+        if isinstance(stmt, list):
+            for statement in stmt:
+                self.execute(statement)
+        else:
+            stmt.accept(self)
+
+
+    def executeBlock(self, statements, environment):
+        previousEnvironment = self.environment
+        try:
+            self.environment = environment
+            for statement in statements:
+                self.execute(statement)
+        finally:
+            self.environment = previousEnvironment
+
+    def visitBlockStmt(self, stmt):
+        self.executeBlock(stmt.statements, Environment(self.enviroment))
+        return None
+    
     
     def visitExpressionStmt(self, stmt):
         value = self.evaluate(stmt.expression)
@@ -98,6 +117,8 @@ class Interpreter(Visitor, StmtVisitor):
         return None
     
     def visitVariableExpr(self, expr):
+        # print("EXPR: ", expr)
+        # print("EXPR.NAME: ", expr.name)
         return self.enviroment.get(expr.name)
 
     def visitBinaryExpr(self, expr):

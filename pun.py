@@ -48,7 +48,7 @@ class Pun:
         parser = Parser(tokens)
         # print(f"PARSER: \n{parser}")
         expressions = parser.parse()
-        # print("EXPRESSION: ", expression)
+        # print("EXPRESSIONS: ", expressions)
         if self.had_error:
             return
         self.interpreter.interpret(expressions)
