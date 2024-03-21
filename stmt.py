@@ -40,4 +40,4 @@ class Block(Stmt):
         self.statements = statements
 
     def accept(self, visitor):
-        return visitor.visitBlock(self)
+        return visitor.visitBlockStmt(self)

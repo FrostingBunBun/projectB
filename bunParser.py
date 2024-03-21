@@ -3,6 +3,7 @@ from tokenType import TokenType
 from bunToken import Token
 from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical
 import stmt
+from stmt import Block, Expression
 
 class Parser:
     class ParseError(RuntimeError):
@@ -13,7 +14,7 @@ class Parser:
         self.current = 0
 
     # def expression(self) -> Expr:
-    #     return self.equality()
+        # return self.equality()
         
     def expression(self) -> Expr:
         return self.assignment()
@@ -24,7 +25,7 @@ class Parser:
         elif  self.match(TokenType.IF):
             return self.ifStatement()
         elif self.match(TokenType.LEFT_BRACE):
-            return self.block()
+            return Block(self.block())
         else:
             return self.expressionStatement()
         
@@ -53,14 +54,15 @@ class Parser:
     
     def block(self):
         statements = []
+    
         while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
             statements.append(self.declaration())
-        self.consume(TokenType.RIGHT_BRACE, "Except '}' after block.")
+    
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
     
     def assignment(self):
-        # expr = self.equality()
-        expr = self.or_()
+        expr = self.equality()
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()

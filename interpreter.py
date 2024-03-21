@@ -20,17 +20,20 @@ class Interpreter(Visitor, StmtVisitor):
 
 
     def executeBlock(self, statements, environment):
-        previousEnvironment = self.environment
+        previous = self.enviroment
         try:
-            self.environment = environment
+            self.enviroment = environment
+
             for statement in statements:
                 self.execute(statement)
         finally:
-            self.environment = previousEnvironment
+            self.enviroment = previous
+
 
     def visitBlockStmt(self, stmt):
         self.executeBlock(stmt.statements, Environment(self.enviroment))
         return None
+
     
     
     def visitExpressionStmt(self, stmt):
@@ -53,16 +56,19 @@ class Interpreter(Visitor, StmtVisitor):
 
     def visitVarStmt(self, stmt):
         value = None
-        if stmt.initializer:
+        if stmt.initializer is not None:
             value = self.evaluate(stmt.initializer)
 
         self.enviroment.define(stmt.name.lexeme, value)
         return None
+
     
     def visitAssignExpr(self, expr):
         value = self.evaluate(expr.value)
         self.enviroment.assign(expr.name, value)
         return value
+
+    
     
     @staticmethod
     def isTruthy(obj):
@@ -138,8 +144,6 @@ class Interpreter(Visitor, StmtVisitor):
         return None
     
     def visitVariableExpr(self, expr):
-        # print("EXPR: ", expr)
-        # print("EXPR.NAME: ", expr.name)
         return self.enviroment.get(expr.name)
 
     def visitBinaryExpr(self, expr):
