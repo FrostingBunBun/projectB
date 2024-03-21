@@ -83,3 +83,29 @@ class Variable(Expr):
     def accept(self, visitor):
         """ Create a accept method that calls the visitor. """
         return visitor.visitVariableExpr(self)
+    
+class If(Expr):
+    def __init__(self, condition, then_branch, else_branch):
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
+
+    def __str__(self):
+        return f"If: {self.condition}, {self.then_branch}, {self.else_branch}"
+
+    def accept(self, visitor):
+        return visitor.visitIfExpr(self)
+    
+class Logical:
+        def __init__(self, left, operator, right):
+            self.left = left
+            self.operator = operator
+            self.right = right
+
+        def accept(self, visitor):
+            return visitor.visitLogicalExpr(self)
+        
+class While:
+        def __init__(self, condition, body):
+            self.condition = condition
+            self.body = body

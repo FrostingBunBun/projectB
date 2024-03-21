@@ -1,7 +1,7 @@
 from typing import List
 from tokenType import TokenType
 from bunToken import Token
-from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign
+from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical
 import stmt
 
 class Parser:
@@ -20,13 +20,28 @@ class Parser:
     
     def statement(self):
         if self.match(TokenType.PRINT):
-            return self.print_statement()
+            return self.printStatement()
+        elif  self.match(TokenType.IF):
+            return self.ifStatement()
         elif self.match(TokenType.LEFT_BRACE):
             return self.block()
         else:
             return self.expressionStatement()
+        
+    def ifStatement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.") 
+
+        thenBranch = self.statement()
+        elseBranch = None
+        if self.match(TokenType.ELSE):
+            elseBranch = self.statement()
+
+        return If(condition, thenBranch, elseBranch)
+
     
-    def print_statement(self):
+    def printStatement(self):
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Print(value)
@@ -44,7 +59,8 @@ class Parser:
         return statements
     
     def assignment(self):
-        expr = self.equality()
+        # expr = self.equality()
+        expr = self.or_()
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()
@@ -58,8 +74,30 @@ class Parser:
 
         return expr
 
+    def or_(self):
+        expr = self.and_()
 
-    def equality(self) -> Expr:
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.and_()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+    
+    def and_(self):
+        expr = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+
+    
+    def equality(self):
         """
         equality → comparison ( ( "!=" | "==" ) comparison )* ;
         """
