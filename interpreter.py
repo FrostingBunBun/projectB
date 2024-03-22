@@ -50,7 +50,7 @@ class Interpreter(Visitor, StmtVisitor):
         return None
     
     def visitFunctionStmt(self, stmt):
-        function = PunFunction(stmt)
+        function = PunFunction(stmt, self.enviroment)
         self.enviroment.define(stmt.name.lexeme, function)
         return None
 
