@@ -105,3 +105,23 @@ class Logical(Expr):
         def accept(self, visitor):
             return visitor.visitLogicalExpr(self)
         
+class Call(Expr):
+    def __init__(self, callee, paren, arguments):
+        self.callee = callee
+        self.paren = paren
+        self.arguments = arguments
+
+    def accept(self, visitor):
+        return visitor.visitCallExpr(self)
+    
+class Function:
+    def __init__(self, name, params, body):
+        self.name = name
+        self.params = params
+        self.body = body
+
+    def accept(self, visitor):
+        return visitor.visitFunctionStmt(self)
+
+    def __str__(self):
+        return f"<fn {self.name.lexeme}>"

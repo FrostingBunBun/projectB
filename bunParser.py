@@ -1,7 +1,7 @@
 from typing import List
 from tokenType import TokenType
 from bunToken import Token
-from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical
+from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical, Function, Call
 import stmt
 from stmt import Block, While, Expression
 
@@ -30,8 +30,30 @@ class Parser:
             return self.whileStatement()
         elif self.match(TokenType.FOR):
             return self.forStatement()
+        elif self.match(TokenType.FUN):
+            return self._function("function")
+
         else:
             return self.expressionStatement()
+        
+    def _function(self, kind):
+        name = self.consume(TokenType.IDENTIFIER,"Expect " + kind + " name.")
+
+        self.consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        parameters = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) >= 255:
+                    self.error(self.peek(), "Giga got more than 255 parameters.")
+                parameters.append(self.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        self.consume(TokenType.LEFT_BRACE, f"Expect '{{' before {kind} body.")
+        body = self.block()
+        return Function(name, parameters, body)
+
+
         
     def forStatement(self):
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
@@ -272,7 +294,39 @@ class Parser:
             right = self.unary()
             return Unary(operator, right)
 
-        return self.primary()
+        # return self.primary()
+        return self.call()
+    
+    def call(self):
+        expr = self.primary()
+
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finishCall(expr)
+            else:
+                break
+
+        return expr
+    
+    def finishCall(self, callee):
+        arguments = []
+
+        # Parse the arguments if there are any
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if (len(arguments) >= 255):
+                    self.error(self.peek(), "Giga, too many arguments") 
+                arguments.append(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+
+        # Consume the closing parenthesis
+        paren = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+
+        # Return a Call expression node
+        return Call(callee, paren, arguments)
+
+
 
     def primary(self) -> Expr:
         """

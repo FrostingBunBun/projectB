@@ -2,11 +2,18 @@ from Expr import Visitor
 from tokenType import TokenType
 from stmt import StmtVisitor
 from enviroment import Environment
+from punCallable import PunCallable
+from punFunction import PunFunction
 
 
 class Interpreter(Visitor, StmtVisitor):
 
-    enviroment = Environment()
+    def __init__(self):
+        self.globals = Environment()
+        self.globals.define("clock", PunCallable())
+        self.enviroment = self.globals
+
+    
 
     def evaluate(self, expr):
         return expr.accept(self)
@@ -41,6 +48,12 @@ class Interpreter(Visitor, StmtVisitor):
         print(self.stringify(value))
         return None
     
+    def visitFunctionStmt(self, stmt):
+        function = PunFunction(stmt)
+        self.enviroment.define(stmt.name.lexeme, function)
+        return None
+
+    
     def visitIfStmt(self, stmt):
         if self.is_truthy(self.evaluate(stmt.condition)):
             self.execute(stmt.thenBranch)
@@ -67,7 +80,7 @@ class Interpreter(Visitor, StmtVisitor):
             value = self.evaluate(stmt.initializer)
         else:
             value = None  # Set value to None if no initializer is provided
-        
+
         self.enviroment.define(stmt.name.lexeme, value)
         return None
 
@@ -234,6 +247,22 @@ class Interpreter(Visitor, StmtVisitor):
     
         # Unreachable.
         return None
+    
+
+    def visitCallExpr(self, expr):
+
+        callee = self.evaluate(expr.callee)
+        arguments = [self.evaluate(argument) for argument in expr.arguments] # faaaancy
+
+        if not isinstance(callee, PunCallable):
+            raise RuntimeError(f"Can only call functions and classes at line {expr.paren.line}.")
+        function = callee
+
+        if len(arguments) != function.arity():
+            raise RuntimeError(f"Expected {function.arity()} arguments but got {len(arguments)} at line {expr.paren.line}.")
+
+        return function.call(self, arguments)
+
     
 
     
