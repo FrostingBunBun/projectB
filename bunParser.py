@@ -3,7 +3,7 @@ from tokenType import TokenType
 from bunToken import Token
 from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical
 import stmt
-from stmt import Block, While
+from stmt import Block, While, Expression
 
 class Parser:
     class ParseError(RuntimeError):
@@ -28,8 +28,52 @@ class Parser:
             return Block(self.block())
         elif self.match(TokenType.WHILE):
             return self.whileStatement()
+        elif self.match(TokenType.FOR):
+            return self.forStatement()
         else:
             return self.expressionStatement()
+        
+    def forStatement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer = None
+
+        if self.match(TokenType.SEMICOLON):
+            initializer = None
+        elif self.match(TokenType.VAR):
+            initializer = self.varDeclaration()
+        else:
+            initializer = self.expressionStatement()
+
+        condition = None
+        if not (self.check(TokenType.SEMICOLON)):
+            condition = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        increment = None
+        if not  (self.check(TokenType.RIGHT_PAREN)):
+            increment = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body = self.statement()
+
+        if increment != None:
+            body = Block( [body, Expression(increment)] )
+            # body = Block( [body, Expression.assign(increment)] )
+
+        if condition is None:
+            condition = Literal(True)
+        
+        body = While(condition, body)
+
+        if (initializer != None):
+            body = Block( [initializer, body] )
+
+
+        return body
+
+
+
         
     def ifStatement(self):
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
@@ -286,6 +330,8 @@ class Parser:
 
             self.advance()
 
+
+
     def declaration(self):
         try:
             if self.match(TokenType.VAR):
@@ -305,6 +351,9 @@ class Parser:
 
         self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return stmt.Var(name, initializer)
+    
+
+
     
     def whileStatement(self):
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")

@@ -54,13 +54,23 @@ class Interpreter(Visitor, StmtVisitor):
         print(self.stringify(value))
         return None
     
-    def visitVarStmt(self, stmt):
-        value = None
-        # if stmt.initializer is not None:
-        value = self.evaluate(stmt.initializer)
+    # def visitVarStmt(self, stmt):
+    #     value = None
+    #     # if stmt.initializer is not None:
+    #     value = self.evaluate(stmt.initializer)
 
+    #     self.enviroment.define(stmt.name.lexeme, value)
+    #     return None
+
+    def visitVarStmt(self, stmt):
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+        else:
+            value = None  # Set value to None if no initializer is provided
+        
         self.enviroment.define(stmt.name.lexeme, value)
         return None
+
 
     def visitWhileStmt(self, stmt):
         while self.isTruthy(self.evaluate(stmt.condition)):
