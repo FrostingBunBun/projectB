@@ -56,8 +56,8 @@ class Interpreter(Visitor, StmtVisitor):
     
     def visitVarStmt(self, stmt):
         value = None
-        if stmt.initializer is not None:
-            value = self.evaluate(stmt.initializer)
+        # if stmt.initializer is not None:
+        value = self.evaluate(stmt.initializer)
 
         self.enviroment.define(stmt.name.lexeme, value)
         return None
@@ -70,13 +70,25 @@ class Interpreter(Visitor, StmtVisitor):
 
 
     
+    # def visitAssignExpr(self, expr):
+    #     value = self.evaluate(expr.value)
+    #     self.enviroment.assign(expr.name, value)
+    #     return value
+
     def visitAssignExpr(self, expr):
         value = self.evaluate(expr.value)
-        self.enviroment.assign(expr.name, value)
+        self.enviroment.assign(expr.name.lexeme, value)  # Update the environment with the new value
         return value
+    
+    
+    # @staticmethod
+    # def isTruthy(obj):
+    #     if obj is None:
+    #         return False
+    #     if isinstance(obj, bool):
+    #         return obj
+    #     return True
 
-    
-    
     @staticmethod
     def isTruthy(obj):
         if obj is None:

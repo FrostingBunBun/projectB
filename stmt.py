@@ -3,7 +3,9 @@ class Stmt:
 
 class StmtVisitor:
     def visitExpression(self, stmt):
-        pass
+        value = self.evaluate(stmt.expression)
+        # Optionally handle side effects here, such as printing the value
+        print(value)
     
     def visitPrint(self, stmt):
         value = self.evaluate(stmt.expression)

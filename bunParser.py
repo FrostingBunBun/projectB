@@ -63,13 +63,28 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
     
+    # def assignment(self):
+    #     # expr = self.equality()
+    #     expr = self.or_()
+
+    #     if self.match(TokenType.EQUAL):
+    #         equals = self.previous()
+    #         value = self.assignment()
+
+    #         if isinstance(expr, Variable):
+    #             name = expr.name
+    #             return Assign(name, value)
+
+    #         self.error(equals, "Invalid assignment target.")
+
+    #     return expr
+
     def assignment(self):
-        # expr = self.equality()
-        expr = self.or_()
+        expr = self.or_()  # Assuming `or_()` parses logical OR expressions
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()
-            value = self.assignment()
+            value = self.assignment()  # Recursively parse the right-hand side of the assignment
 
             if isinstance(expr, Variable):
                 name = expr.name
@@ -78,6 +93,8 @@ class Parser:
             self.error(equals, "Invalid assignment target.")
 
         return expr
+
+
 
     def or_(self):
         expr = self.and_()
