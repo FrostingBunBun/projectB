@@ -1,5 +1,6 @@
 from punCallable import PunCallable
 from enviroment import Environment
+from _return import ReturnException
 
 class PunFunction(PunCallable):
     def __init__(self, declaration):
@@ -16,5 +17,9 @@ class PunFunction(PunCallable):
         for i in range(len(self.declaration.params)):
             environment.define(self.declaration.params[i].lexeme, arguments[i])
 
-        interpreter.executeBlock(self.declaration.body, environment)
+        try:
+            interpreter.executeBlock(self.declaration.body, environment)
+        except ReturnException as return_value:
+            return return_value.value
+
         return None

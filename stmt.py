@@ -55,3 +55,11 @@ class While(Stmt):
 
     def accept(self, visitor):
         return visitor.visitWhileStmt(self)
+    
+class Return(Stmt):
+    def __init__(self, keyword, value):
+        self.keyword = keyword
+        self.value = value
+
+    def accept(self, visitor):
+        return visitor.visitReturnStmt(self)

@@ -3,7 +3,7 @@ from tokenType import TokenType
 from bunToken import Token
 from Expr import Expr, Binary, Unary, Literal, Grouping, Variable, Assign, If, Logical, Function, Call
 import stmt
-from stmt import Block, While, Expression
+from stmt import Block, While, Expression, Return
 
 class Parser:
     class ParseError(RuntimeError):
@@ -32,9 +32,22 @@ class Parser:
             return self.forStatement()
         elif self.match(TokenType.FUN):
             return self._function("function")
+        elif self.match(TokenType.RETURN):
+            return self.returnStatement()
 
         else:
             return self.expressionStatement()
+        
+
+    def returnStatement(self):
+        keyword = self.previous()
+        value = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Return(keyword, value)
+
         
     def _function(self, kind):
         name = self.consume(TokenType.IDENTIFIER,"Expect " + kind + " name.")

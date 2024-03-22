@@ -4,6 +4,7 @@ from stmt import StmtVisitor
 from enviroment import Environment
 from punCallable import PunCallable
 from punFunction import PunFunction
+from _return import ReturnException
 
 
 class Interpreter(Visitor, StmtVisitor):
@@ -54,8 +55,8 @@ class Interpreter(Visitor, StmtVisitor):
         return None
 
     
-    def visitIfStmt(self, stmt):
-        if self.is_truthy(self.evaluate(stmt.condition)):
+    def visitIfExpr(self, stmt):
+        if self.isTruthy(self.evaluate(stmt.condition)):
             self.execute(stmt.thenBranch)
         elif stmt.elseBranch is not None:
             self.execute(stmt.elseBranch)
@@ -66,6 +67,14 @@ class Interpreter(Visitor, StmtVisitor):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
         return None
+    
+    def visitReturnStmt(self, stmt):
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+
+        raise ReturnException(value)
+
     
     # def visitVarStmt(self, stmt):
     #     value = None
