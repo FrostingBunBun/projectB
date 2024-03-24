@@ -13,6 +13,7 @@ class Interpreter(Visitor, StmtVisitor):
         self.globals = Environment()
         self.globals.define("clock", PunCallable())
         self.enviroment = self.globals
+        self.locals = {}
 
     
 
@@ -25,6 +26,9 @@ class Interpreter(Visitor, StmtVisitor):
                 self.execute(statement)
         else:
             stmt.accept(self)
+
+    def resolve(self, expr, depth):
+        self.locals[expr] = depth
 
 
     def executeBlock(self, statements, environment):
@@ -109,7 +113,17 @@ class Interpreter(Visitor, StmtVisitor):
 
     def visitAssignExpr(self, expr):
         value = self.evaluate(expr.value)
-        self.enviroment.assign(expr.name.lexeme, value)  # Update the environment with the new value
+        
+        # self.enviroment.assign(expr.name.lexeme, value)
+
+        distance = self.locals.get(expr)
+        if distance is not None:
+            self.environment.assignAt(distance, expr.name.lexeme, value)
+        else:
+            self.globals.assign(expr.name.lexeme, value)
+
+
+
         return value
     
     
@@ -196,7 +210,16 @@ class Interpreter(Visitor, StmtVisitor):
         return None
     
     def visitVariableExpr(self, expr):
-        return self.enviroment.get(expr.name)
+        # return self.enviroment.get(expr.name)
+        return self.lookUpVariable(expr.name, expr)
+    
+    def lookUpVariable(self, name, expr):
+        distance = self.locals.get(expr)
+        if distance is not None:
+            return self.environment.get_at(distance, name)
+        else:
+            return self.globals.get(name)
+
 
     def visitBinaryExpr(self, expr):
 

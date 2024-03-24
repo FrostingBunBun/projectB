@@ -5,6 +5,7 @@ from bunParser import Parser
 from astPrinter import AstPrinter
 from tokenType import TokenType
 from interpreter import Interpreter
+from resolver import Resolver
 
 class Pun:
 
@@ -47,11 +48,15 @@ class Pun:
         # print(f"TOKENS: \n{tokens}")
         parser = Parser(tokens)
         # print(f"PARSER: \n{parser}")
-        expressions = parser.parse()
-        # print("EXPRESSIONS: ", expressions)
+        statements = parser.parse()
+        # print("EXPRESSIONS: ", statements)
         if self.had_error:
             return
-        self.interpreter.interpret(expressions)
+        
+        resolver = Resolver(self.interpreter)
+        # resolver.resolve(statements) ??????????????????????????????????
+
+        self.interpreter.interpret(statements)
         # print(AstPrinter().print(expression))
         
 
